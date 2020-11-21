@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "updateUser",
+  "type": "array",
+  "properties": {
+    "user_type": {
+      "type": "number",
+      "oneOf": [9000, 1000, 1010, 1020]
+    }
+  },
+  "additionalProperties": false
+}
