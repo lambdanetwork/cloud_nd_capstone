@@ -1,4 +1,4 @@
-import "../../../service/node_modules/source-map-support/register";
+import "source-map-support/register";
 
 import {
   APIGatewayProxyEvent,
@@ -49,10 +49,18 @@ export const updateUserType: APIGatewayProxyHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const logger = createLogger("update userType");
+    const userType = validateUserType(event);
+    if (!userType) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "invalid query user_type",
+        }),
+      };
+    }
     const userId = getUserId(event);
-    const type = Number(event.queryStringParameters.user_type) as UserType;
 
-    await UserService.updateUserType(userId, { type }, logger);
+    await UserService.updateUserType(userId, { type: userType }, logger);
     return {
       statusCode: 200,
       body: "",
@@ -65,3 +73,19 @@ export const updateUserType: APIGatewayProxyHandler = async (
     console.error(err);
   }
 };
+
+function validateUserType(event: {
+  queryStringParameters: { [key: string]: any };
+}) {
+  const type = event.queryStringParameters
+    ? Number(event.queryStringParameters.user_type)
+    : null;
+  const isValidType =
+    type &&
+    type !== UserType.ADMIN &&
+    Object.keys(UserType).indexOf(String(type)) >= 0;
+
+  return isValidType ? type : null;
+}
+
+// console.log(validateUserType({ queryStringParameters: { user_type: 1000 } }));
