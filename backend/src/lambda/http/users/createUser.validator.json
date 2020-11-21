@@ -10,8 +10,11 @@
     "age": {
       "type": "number",
       "minimum": 6
+    },
+    "userAuth0": {
+      "type": "object"
     }
   },
   "required": ["name", "age"],
-  "additionalProperties": false
+  "additionalProperties": true
 }

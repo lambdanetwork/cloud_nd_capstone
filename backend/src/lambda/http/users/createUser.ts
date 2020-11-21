@@ -1,4 +1,4 @@
-import "../../../service/node_modules/source-map-support/register";
+import "source-map-support/register";
 
 import {
   APIGatewayProxyEvent,
@@ -8,18 +8,27 @@ import {
 import * as AWS from "aws-sdk";
 import { createLogger } from "../../../utils/logger";
 import { UserService } from "../../../service/user.service";
+import { getUserId } from "../../utils";
+import { CreateUserReq } from "../../../requests/user/createUser.request";
 
 AWS.config.update({ region: "ap-southeast-1" });
-const logger = createLogger("create todo");
+const logger = createLogger("create user ");
 
+/**
+ * To be called by auth0
+ */
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const todoObj = UserService.create(event, logger);
+    const userId = getUserId(event);
+    const userProfileReq: CreateUserReq =
+      typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+
+    const user = UserService.create(userId, userProfileReq, logger);
     return {
       statusCode: 200,
-      body: JSON.stringify(todoObj),
+      body: JSON.stringify(user),
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,
@@ -29,25 +38,3 @@ export const handler: APIGatewayProxyHandler = async (
     logger.error(`fail to create item`, err);
   }
 };
-
-/**
- *  CreateUser:
-    handler: src/lambda/http/createUser.handler
-    events:
-      - http:
-          method: post
-          path: users
-          cors: true
-          authorizer: Auth
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Create a new todo item
-            description: Create a new todo item
-            requestModels:
-              'application/json': CreateUserReq
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
- */
