@@ -75,7 +75,7 @@ export class TodoDataLayer {
       region: process.env.REGION,
     });
     const bucketName = process.env.TODO_IMAGES_S3_BUCKET;
-    const urlExpiration = process.env.SIGNED_URL_EXPIRATION;
+    const urlExpiration = process.env.S3.SIGNED_URL_EXPIRATION;
 
     function getUploadUrl(todoId: string) {
       return s3.getSignedUrl("putObject", {
