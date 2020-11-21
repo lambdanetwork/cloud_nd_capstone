@@ -1,5 +1,10 @@
 import { sessionId } from "./session.model";
-export type UserType = 9000 | 1000 | 1020 | 1010; // 9000 admin, 1000 student, 1020 tutor, 1010 parent
+export enum UserType {
+  ADMIN = 9000,
+  STUDENT = 1000,
+  PARENT = 1010,
+  TUTOR = 1020,
+}
 
 export class User {
   // from auth0
