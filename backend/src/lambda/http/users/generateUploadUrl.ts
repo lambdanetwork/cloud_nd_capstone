@@ -1,4 +1,4 @@
-import "../../../service/node_modules/source-map-support/register";
+import "source-map-support/register";
 
 import {
   APIGatewayProxyEvent,

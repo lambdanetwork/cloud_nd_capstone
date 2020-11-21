@@ -1,5 +1,5 @@
 import { CustomAuthorizerEvent, CustomAuthorizerResult } from "aws-lambda";
-import "../../service/node_modules/source-map-support/register";
+import "source-map-support/register";
 
 import { verify } from "jsonwebtoken";
 import { createLogger } from "../../utils/logger";

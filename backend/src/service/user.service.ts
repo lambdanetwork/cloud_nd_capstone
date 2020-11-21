@@ -9,8 +9,8 @@ import {
 } from "../requests/user/updateProfileRequest";
 import { v4 as uuidv4 } from "uuid";
 import { UserRepository } from "../repository/user.repository";
-
-const bucketName = process.env.TODO_IMAGES_S3_BUCKET;
+//
+// const bucketName = process.env.TODO_IMAGES_S3_BUCKET;
 
 export class UserService {
   static async getUserById(
@@ -22,8 +22,6 @@ export class UserService {
     const items = await UserRepository.getTodoByUserId(userId);
     return { Items: items };
   }
-
-  static async getTutors(event, logger) {}
 
   /**
    * This function will be triggered by auth0 hook, post-registration
