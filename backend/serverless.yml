@@ -41,12 +41,10 @@ custom:
       - name: CreateUserReq
         contentType: application/json
         schema: ${file(src/lambda/http/users/createUser.validator.json)}
-      - name: UpdateProfileReq
-        contentType: application/json
-        schema: ${file(src/lambda/http/users/updateUser.validator.json)}
-      - name: UpdateuserTypeReq
-        contentType: application/json
-        schema: ${file(src/lambda/http/users/updateuserType.validator.json)}
+      # - name: UpdateProfileReq
+      #   contentType: application/json
+      #   schema: ${file(src/lambda/http/users/updateUser.validator.json)}
+      
 
 functions:
 
@@ -95,12 +93,12 @@ functions:
           path: users/profile
           cors: true
           authorizer: Auth
-          reqValidatorName: RequestBodyValidator
+          # reqValidatorName: RequestBodyValidator
           documentation:
             summary: Update user profile
             description: Update user profile
-            requestModels:
-              'application/json': UpdateProfileReq
+            # requestModels:
+            #   'application/json': UpdateProfileReq
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -115,7 +113,6 @@ functions:
           path: users/type
           cors: true
           authorizer: Auth
-          reqValidatorName: QueryUpdateUserTypeValidator
           documentation:
             summary: Update user type to student or parent
             description: Update user type to student or parent
@@ -138,6 +135,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
+          - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE}
 
   UserGenerateUploadUrl:
@@ -166,14 +164,7 @@ resources:
           Ref: ApiGatewayRestApi
         ValidateRequestBody: true
         ValidateRequestParameters: false
-    QueryUpdateUserTypeValidator:
-      Type: AWS::ApiGateway::RequestValidator
-      Properties:
-        Name: ParameterRequestValidator
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        ValidateRequestBody: false
-        ValidateRequestParameters: true
+    
         
 
     GatewayResponseDefault4XX:
@@ -280,8 +271,6 @@ resources:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          # - AttributeName: type
-          #   AttributeType: S
           # - AttributeName: emailMain
           #   AttributeType: S
         KeySchema:
