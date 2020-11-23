@@ -25,7 +25,7 @@ export const handler: APIGatewayProxyHandler = async (
     const userProfileReq: CreateUserReq =
       typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
-    const user = UserService.create(userId, userProfileReq, logger);
+    const user = await UserService.create(userId, userProfileReq, logger);
     return {
       statusCode: 200,
       body: JSON.stringify(user),
