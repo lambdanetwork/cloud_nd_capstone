@@ -9,18 +9,22 @@ import {
 } from "../requests/user/updateProfileRequest";
 import { v4 as uuidv4 } from "uuid";
 import { UserRepository } from "../repository/user.repository";
+import { loggerRunP } from "../utils/loggerRun";
 //
 // const bucketName = process.env.TODO_IMAGES_S3_BUCKET;
 
 export class UserService {
-  static async getUserById(
-    userId: string,
-    logger: Logger
-  ): Promise<{ Items: User }> {
-    logger.info(`get item with userId ${userId}`);
-
-    const items = await UserRepository.getTodoByUserId(userId);
-    return { Items: items };
+  static async getUserById(userId: string, logger: Logger): Promise<User> {
+    // logger.info(`get item with userId ${userId}`);
+    // const items = await UserRepository.getUserById(userId);
+    // return items[0];
+    return loggerRunP(userId, logger)
+      .map(async () => {
+        logger.info(`get item with userId ${userId}`);
+        const items = await UserRepository.getUserById(userId);
+        return items[0];
+      })
+      .flat();
   }
 
   /**
@@ -28,19 +32,18 @@ export class UserService {
    */
   static async create(
     userId: string,
-    userReq: CreateUserReq,
+    userAuth0: CreateUserReq,
     logger: Logger
   ): Promise<User> {
     // parse request body
-    const { name, age, userAuth0 } = userReq;
 
     const newUser: User = {
       userId: userId,
       emailMain: userAuth0.email,
       username: userAuth0.username,
       Session: new Set(),
-      age: Number(age),
-      name,
+      age: 0,
+      name: "",
       school: "",
       address: "",
       emailMainVerified: userAuth0.emailVerified,
@@ -56,25 +59,24 @@ export class UserService {
       updatedAt: Date.now(),
       createdAt: Date.now(),
     };
-    logger.info(`Creating user with params ${newUser}`);
-    const createdUser = await UserRepository.create(newUser);
 
-    return createdUser;
+    return loggerRunP(newUser, logger)
+      .map(async () => {
+        logger.info(`Creating user with params ${newUser}`);
+        const items = await UserRepository.create(newUser);
+        return items;
+      })
+      .flat();
   }
 
   static async updateProfile(
     userId: string,
     userReq: UpdateProfileReq,
     logger: Logger
-  ): Promise<boolean> {
-    const updateUser: UpdateProfileReq & {
-      userId?: string;
-      updatedAt?: number;
-    } = userReq;
-    updateUser.userId = userId;
-    updateUser.updatedAt = Date.now();
+  ): Promise<User> {
+    const updateUser: UpdateProfileReq = userReq;
 
-    logger.info(`Updating user with params ${updateUser}`);
+    logger.info(`Updating user ${userId} with params ${updateUser}`);
     return await UserRepository.updateProfile(userId, updateUser);
   }
 
@@ -83,22 +85,21 @@ export class UserService {
     updateUserTypeReq: UpdateUserTypeReq,
     logger: Logger
   ): Promise<boolean> {
-    const updateUser: UpdateUserTypeReq & {
-      updatedAt?: number;
-    } = updateUserTypeReq;
-    updateUser.updatedAt = Date.now();
+    const updateUser: UpdateUserTypeReq = updateUserTypeReq;
 
     logger.info(
       `Updating user type with params userId: ${userId}, type: ${updateUser}`
     );
-
-    return await UserRepository.updateUserType(userId, updateUser);
+    return UserRepository.updateUserType(userId, updateUser);
   }
 
   static async deleteTodo(userId: string, logger: Logger): Promise<boolean> {
-    logger.info(`Deleting item with user:${userId} `);
-
-    return await UserRepository.delete(userId);
+    return loggerRunP(userId, logger)
+      .map(async (userId) => {
+        logger.info(`Deleting item with user:${userId} `);
+        return await UserRepository.delete(userId);
+      })
+      .flat();
   }
 
   static async generateUploadPhotoUrl(userId: string, logger: Logger) {
@@ -106,11 +107,14 @@ export class UserService {
 
     // const photoUrl: string =
     //   "https://" + bucketName + ".s3.amazonaws.com/" + imageId;
-    logger.info(
-      `trying to get upload url userID: ${userId}, imageId: ${imageId}`
-    );
-    const url = UserRepository.getUploadPhotoUrl(imageId);
 
-    return url;
+    return loggerRunP(userId, logger)
+      .map(async (userId) => {
+        logger.info(
+          `trying to get upload url userID: ${userId}, imageId: ${imageId}`
+        );
+        return await UserRepository.getUploadPhotoUrl(imageId);
+      })
+      .flat();
   }
 }
