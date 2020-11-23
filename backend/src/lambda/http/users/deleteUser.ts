@@ -16,11 +16,11 @@ export const handler: APIGatewayProxyHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const userId = getUserId(event);
-    UserRepository.delete(userId);
+    const result = await UserRepository.delete(userId);
 
     return {
       statusCode: 200,
-      body: null,
+      body: String(result),
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,

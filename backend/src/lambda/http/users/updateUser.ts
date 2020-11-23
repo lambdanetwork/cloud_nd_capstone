@@ -87,5 +87,3 @@ function validateUserType(event: {
 
   return isValidType ? type : null;
 }
-
-// console.log(validateUserType({ queryStringParameters: { user_type: 1000 } }));
