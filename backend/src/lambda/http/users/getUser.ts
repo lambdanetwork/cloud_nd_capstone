@@ -17,10 +17,20 @@ export const handler: APIGatewayProxyHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const userId = getUserId(event);
-    const result = UserService.getUserById(userId, logger);
+    const user = await UserService.getUserById(userId, logger);
+
+    if (user && user.isDeleted) {
+      //
+    }
+
+    // sanitize response.body
+    delete user.isDeleted;
+    delete user.createdAt;
+    delete user.isClosed;
+
     return {
       statusCode: 200,
-      body: JSON.stringify(result),
+      body: JSON.stringify(user),
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,
