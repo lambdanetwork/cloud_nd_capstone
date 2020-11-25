@@ -1,4 +1,3 @@
-import { sessionId } from "./session.model";
 export enum UserType {
   ADMIN = 9000,
   STUDENT = 1000,
@@ -18,26 +17,13 @@ export class User {
   phoneNumberVerified: boolean;
 
   isDeleted: boolean;
-  isClosed: boolean;
-  name: string;
-  age: number;
-  school: string;
-  address: string;
-  photo: string;
+
+  studentDetailId?: string;
+  tutorDetailId?: string;
   type: UserType;
-  payment: string; //paymentID
-  Session: Set<sessionId>; // Set<session-id>
-  sessionHistory: {
-    [key: string]: {
-      // key is session-id
-      sessionId: sessionId;
-      studentId: string;
-      tutorId: string;
-      ratingFromStudent: 1 | 2 | 3 | 4 | 5;
-      createdAt: number;
-      completedAt: number;
-    };
-  };
+
+  photo?: string;
+  paymentId: string; //paymentID
 
   // time
   updatedAt: number;
