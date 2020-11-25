@@ -10,6 +10,7 @@ import { getUserId } from "../../utils";
 import { UserType } from "../../../models/user.model";
 import { createLogger } from "../../../utils/logger";
 import { validateQueryUserType } from "./utils/validateQueryUserType";
+import { sanitizeResponseBody } from "../../../utils/http/sanitizeResponse";
 
 /**
  * user want to update his profile
@@ -31,6 +32,7 @@ export const updateProfile: APIGatewayProxyHandler = async (
       userProfileReq,
       logger
     );
+    sanitizeResponseBody(item);
 
     return {
       statusCode: 200,

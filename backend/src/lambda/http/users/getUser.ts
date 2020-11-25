@@ -9,6 +9,7 @@ import {
 import { createLogger } from "../../../utils/logger";
 import { UserService } from "../../../service/user.service";
 import { getUserId } from "../../utils";
+import { sanitizeResponseBody } from "../../../utils/http/sanitizeResponse";
 
 const logger = createLogger("getUserById");
 
@@ -24,8 +25,7 @@ export const handler: APIGatewayProxyHandler = async (
     }
 
     // sanitize response.body
-    delete user.isDeleted;
-    delete user.createdAt;
+    sanitizeResponseBody(user);
 
     return {
       statusCode: 200,
