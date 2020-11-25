@@ -9,6 +9,7 @@ import { UserService } from "../../../service/user.service";
 import { getUserId } from "../../utils";
 import { UserType } from "../../../models/user.model";
 import { createLogger } from "../../../utils/logger";
+import { validateQueryUserType } from "./utils/validateQueryUserType";
 
 /**
  * user want to update his profile
@@ -49,7 +50,7 @@ export const updateUserType: APIGatewayProxyHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const logger = createLogger("update userType");
-    const userType = validateUserType(event);
+    const userType = validateQueryUserType(event);
     if (!userType) {
       return {
         statusCode: 400,
@@ -60,7 +61,7 @@ export const updateUserType: APIGatewayProxyHandler = async (
     }
     const userId = getUserId(event);
 
-    await UserService.updateUserType(userId, { type: userType }, logger);
+    await UserService.updateUserType(userId, userType as UserType, logger);
     return {
       statusCode: 200,
       body: "",
@@ -73,17 +74,3 @@ export const updateUserType: APIGatewayProxyHandler = async (
     console.error(err);
   }
 };
-
-function validateUserType(event: {
-  queryStringParameters: { [key: string]: any };
-}) {
-  const type = event.queryStringParameters
-    ? Number(event.queryStringParameters.user_type)
-    : null;
-  const isValidType =
-    type &&
-    type !== UserType.ADMIN &&
-    Object.keys(UserType).indexOf(String(type)) >= 0;
-
-  return isValidType ? type : null;
-}
