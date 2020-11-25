@@ -45,21 +45,9 @@ functions:
 
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
-    
-  GetUsers:
-    handler: src/lambda/http/users/getUser.handler
-    events:
-      - http:
-          method: get
-          path: users
-          cors: true
-          authorizer: Auth
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE}
-
+  
+  GetUsers: ${file(src/lambda/http/users/config/getUser.config.yml)}
+   
   CreateUser:
     handler: src/lambda/http/users/createUser.handler
     events:
@@ -144,6 +132,7 @@ functions:
           - s3:GetObject
         Resource: arn:aws:s3:::${self:provider.environment.USER_IMAGES_S3_BUCKET}/*
 
+# RESOURCES =================================================================================
 
 resources:
   Resources:

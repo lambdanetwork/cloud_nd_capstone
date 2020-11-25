@@ -1,0 +1,12 @@
+handler: src/lambda/http/users/getUser.handler
+  events:
+    - http:
+        method: get
+        path: users
+        cors: true
+        authorizer: Auth
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE}
