@@ -4,6 +4,10 @@ export class NothingP {
     return Promise.resolve(new Nothing());
   }
 }
+
+/**
+ * This Fuctor wrap each execution with try/catch
+ */
 export function loggerRunP(
   value: Promise<any> | NothingP,
   logger: { info: Function; error: Function }
