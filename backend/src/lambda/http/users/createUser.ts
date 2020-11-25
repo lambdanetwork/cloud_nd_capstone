@@ -9,22 +9,27 @@ import * as AWS from "aws-sdk";
 import { createLogger } from "../../../utils/logger";
 import { UserService } from "../../../service/user.service";
 import { getUserId } from "../../utils";
-import { CreateUserReq } from "../../../requests/user/createUser.request";
+import { validateBodyRequest } from "../../../utils/http-validation/validateBodyRequest";
+import { CreateUserDTO } from "./DTO/createUserDTO";
 
 AWS.config.update({ region: "ap-southeast-1" });
 const logger = createLogger("create user ");
 
 /**
- * To be called by auth0
  */
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
     const userId = getUserId(event);
-    const userProfileReq: CreateUserReq =
+    const userProfileReq: CreateUserDTO =
       typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
+    // validate request body, if error return
+    const errorValidateBody = validateBodyRequest(event, CreateUserDTO);
+    if (!!errorValidateBody) return errorValidateBody;
+
+    // if no error
     const user = await UserService.create(userId, userProfileReq, logger);
     return {
       statusCode: 200,
