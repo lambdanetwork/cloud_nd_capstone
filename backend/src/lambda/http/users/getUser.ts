@@ -26,7 +26,6 @@ export const handler: APIGatewayProxyHandler = async (
     // sanitize response.body
     delete user.isDeleted;
     delete user.createdAt;
-    delete user.isClosed;
 
     return {
       statusCode: 200,
