@@ -8,9 +8,14 @@
     "noUnusedParameters": true,
     "sourceMap": true,
     "target": "es2017",
-    "outDir": "lib"
+    "outDir": "lib",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "node_modules/**/*",
+    "test"
   ]
 }

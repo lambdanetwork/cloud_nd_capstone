@@ -7,6 +7,7 @@
     "@types/http-errors": "^1.6.1",
     "aws-xray-sdk": "^2.2.0",
     "axios": "^0.19.0",
+    "class-validator": "^0.12.2",
     "http-errors": "^1.7.2",
     "jsonwebtoken": "^8.5.1",
     "middy": "^0.27.0",
@@ -15,10 +16,15 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/preset-env": "^7.12.7",
     "@types/aws-lambda": "^8.10.17",
+    "@types/jest": "^26.0.15",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/node": "^10.14.4",
     "aws-sdk": "^2.433.0",
+    "babel-jest": "^26.6.3",
+    "jest": "^26.6.3",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-iam-roles-per-function": "^3.0.0-d84bffd",
     "serverless-plugin-canary-deployments": "^0.4.8",
@@ -26,7 +32,7 @@
     "serverless-reqvalidator-plugin": "^1.0.3",
     "serverless-webpack": "^5.3.5",
     "ts-loader": "^5.3.3",
-    "typescript": "^3.4.1",
+    "typescript": "^3.8.1",
     "webpack": "^4.29.6"
   },
   "author": "Ivan Mushketyk",
