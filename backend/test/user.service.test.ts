@@ -9,11 +9,12 @@ UserService.getUserById(
 UserService.create(
   "11775308055487",
   {
-    email: "alfredovidy@gmail.com",
-    username: "icevube",
+    emailMain: "alfredovidy@.com",
+    username: "",
     phoneNumber: "1234",
     phoneNumberVerified: false,
-    emailVerified: false,
+    emailMainVerified: false,
+    type: 1000,
   },
   logger
 ).then(console.log);

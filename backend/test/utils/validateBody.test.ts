@@ -1,5 +1,5 @@
-import { CreateUserDTO } from "../lambda/http/users/DTO/createUserDTO";
-import { validateObj } from "../utils/validateObj";
+import { CreateUserDTO } from "../../src/lambda/http/users/DTO/createUserDTO";
+import { validateObj } from "../../src/utils/validateObj";
 
 const result = validateObj<any>(
   {
