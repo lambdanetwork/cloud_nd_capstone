@@ -4,16 +4,15 @@ import { UserType } from "../../../../models/user.model";
 export class CreateUserDTO {
   // from auth0
   @IsNotEmpty()
-  userId: string;
-  @IsNotEmpty()
   username: string;
   @IsEmail()
   @IsNotEmpty()
   emailMain: string;
+  emailMainVerified: boolean = false;
 
   @IsOptional()
   emailSecondary?: string[];
-  emailMainVerified: boolean = false;
+
   // tenant: string;
   @IsOptional()
   phoneNumber?: string;
