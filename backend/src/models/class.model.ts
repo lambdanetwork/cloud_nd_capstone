@@ -2,11 +2,17 @@ export type classId = string;
 export type userId = string;
 export type tutorId = string;
 
-export class Class {
+export class ClassSession {
   classId: string;
+
   studentId: string;
+  studentUserId: string;
+
+  tutorUserId: string;
   tutorId: string;
+
   imageQuestion: string;
+
   status: 0 | 1 = 0;
   ratingFromStudent?: 1 | 2 | 3 | 4 | 5;
   completedAt?: number;
