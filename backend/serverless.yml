@@ -38,12 +38,7 @@ custom:
         title: Pintar API
         description: Serverless application for todo list
     models:
-      - name: CreateUserReq
-        contentType: application/json
-        schema: ${file(src/lambda/http/users/createUser.validator.json)}
-      # - name: UpdateProfileReq
-      #   contentType: application/json
-      #   schema: ${file(src/lambda/http/users/updateUser.validator.json)}
+     
       
 
 functions:
@@ -73,12 +68,10 @@ functions:
           path: users
           cors: true
           authorizer: Auth
-          reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new user
             description: Create a new user
-            requestModels:
-              'application/json': CreateUserReq
+            
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -93,12 +86,10 @@ functions:
           path: users/profile
           cors: true
           authorizer: Auth
-          # reqValidatorName: RequestBodyValidator
           documentation:
             summary: Update user profile
             description: Update user profile
-            # requestModels:
-            #   'application/json': UpdateProfileReq
+           
     iamRoleStatements:
       - Effect: Allow
         Action:
