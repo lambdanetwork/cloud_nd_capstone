@@ -1,0 +1,156 @@
+import "source-map-support/register";
+
+import { Logger } from "winston";
+import { User, UserType } from "../models/user.model";
+import { CreateUserReq } from "../requests/user/createUser.request";
+import {
+  UpdateProfileReq,
+  UpdateUserTypeReq,
+} from "../requests/user/updateProfileRequest";
+import { v4 as uuidv4 } from "uuid";
+import { UserRepository } from "../repository/user.repository";
+import { loggerRunP } from "../utils/loggerRun";
+//
+// const bucketName = process.env.TODO_IMAGES_S3_BUCKET;
+
+export class SessionService {
+  static async getBySessionId(
+    sessionId: string,
+    logger: Logger
+  ): Promise<User> {
+    // logger.info(`get item with userId ${userId}`);
+    // const items = await UserRepository.getUserById(userId);
+    // return items[0];
+    return loggerRunP(sessionId, logger)
+      .map(async () => {
+        logger.info(`get session by sessionId ${sessionId}`);
+        const items = await SessionRepository.getBySessionId(sessionId);
+        return items[0];
+      })
+      .flat();
+  }
+
+  static async getByUserId(
+    userId: string,
+    type: UserType,
+    logger: Logger
+  ): Promise<User> {
+    // logger.info(`get item with userId ${userId}`);
+    // const items = await UserRepository.getUserById(userId);
+    // return items[0];
+    return loggerRunP(userId, logger)
+      .map(async () => {
+        logger.info(`get item with userId ${userId}`);
+        const items = await SessionRepository.getUserById(userId, type);
+        return items[0];
+      })
+      .flat();
+  }
+
+  /**
+   * This function will be triggered by auth0 hook, post-registration
+   */
+  static async create(
+    studentId: string,
+    tutorId: string,
+    userAuth0: CreateUserReq,
+    logger: Logger
+  ): Promise<User> {
+    // parse request body
+
+    const newSession: Session = {
+      updatedAt: Date.now(),
+      createdAt: Date.now(),
+    };
+
+    return loggerRunP(newSession, logger)
+      .map(async () => {
+        logger.info(`Creating user with params ${newSession}`);
+        const items = await UserRepository.create(newSession);
+        return items;
+      })
+      .flat();
+  }
+
+  /**
+   * Only student can complete the session
+   * Both can close the session
+   * There will be review box
+   */
+  static async completeSession(
+    sessionId: string,
+    studentId: string,
+    logger: Logger
+  ): Promise<User> {
+    const updateUser: UpdateProfileReq = userReq;
+
+    logger.info(`Updating user ${userId} with params ${updateUser}`);
+    return await UserRepository.completeSession(sessionId, studentId);
+  }
+
+  static async closeSession(
+    sessionId: string,
+    userId: string /**could be student or tutor */,
+    logger: Logger
+  ): Promise<User> {
+    const updateUser: UpdateProfileReq = userReq;
+
+    logger.info(`Updating user ${userId} with params ${updateUser}`);
+    return await UserRepository.updateProfile(userId, updateUser);
+  }
+
+  /** only closed session can be review */
+  static async scoreSession(
+    sessionId: string,
+    userId: string /**could be student or tutor */,
+    logger: Logger
+  ): Promise<User> {
+    // Score session will update both User(Tutor Table), student table, and Review Table.
+    const updateUser: UpdateProfileReq = userReq;
+
+    logger.info(`Updating user ${userId} with params ${updateUser}`);
+    return await UserRepository.updateProfile(userId, updateUser);
+  }
+
+  static chatSession(
+    sessionId: string,
+    userId: string /**could be student or tutor */,
+    logger: Logger
+  ) {
+    // Score session will update both User(Tutor Table), student table, and Review Table.
+    const updateUser: UpdateProfileReq = userReq;
+
+    logger.info(`Updating user ${userId} with params ${updateUser}`);
+    return await UserRepository.updateProfile(userId, updateUser);
+  }
+
+  static async reportSession(
+    userId: string,
+    sessionId: string,
+    report: ReportSession,
+    logger: Logger
+  ): Promise<boolean> {
+    const updateUser: UpdateUserTypeReq = updateUserTypeReq;
+
+    logger.info(
+      `Updating user type with params userId: ${userId}, type: ${updateUser}`
+    );
+    return UserRepository.updateUserType(userId, updateUser);
+  }
+
+  static async generateUploadPhotoUrl(userId: string, logger: Logger) {
+    const imageId = uuidv4();
+
+    // const photoUrl: string =
+    //   "https://" + bucketName + ".s3.amazonaws.com/" + imageId;
+
+    return loggerRunP(userId, logger)
+      .map(async (userId) => {
+        logger.info(
+          `trying to get upload url userID: ${userId}, imageId: ${imageId}`
+        );
+        return await UserRepository.getUploadPhotoUrl(imageId);
+      })
+      .flat();
+  }
+}

@@ -6,20 +6,30 @@ import {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import * as AWS from "aws-sdk";
-import { TodoBusinessLayer } from "../../businessLayer/todoBusinesLayer";
-import { createLogger } from "../../utils/logger";
+import { createLogger } from "../../../utils/logger";
+import { getUserId } from "../../utils";
+import { uuidv4 as v4 } from "uuid";
 
 AWS.config.update({ region: "ap-southeast-1" });
-const logger = createLogger("create todo");
+const logger = createLogger("create user ");
 
+/**
+ * To be called by auth0
+ */
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const todoObj = TodoBusinessLayer.createTodo(event, logger);
+    const userId = getUserId(event);
+    const sessionId = v4();
+    const sessionBody =
+      typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+    sessionBody.sessionId = sessionId;
+
+    const user = await SessionService.create(userId, sessionBody, logger);
     return {
       statusCode: 200,
-      body: JSON.stringify(todoObj),
+      body: JSON.stringify(user),
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,
@@ -29,25 +39,3 @@ export const handler: APIGatewayProxyHandler = async (
     logger.error(`fail to create item`, err);
   }
 };
-
-/**
- *   CreateTodo:
-    handler: src/lambda/http/createTodo.handler
-    events:
-      - http:
-          method: post
-          path: todos
-          cors: true
-          authorizer: Auth
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Create a new todo item
-            description: Create a new todo item
-            requestModels:
-              'application/json': CreateRequest
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
- */
