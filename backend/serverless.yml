@@ -21,11 +21,11 @@ provider:
 
     environment:
       REGION: ${opt:region, 'ap-southeast-1'}
-      SESSION_TABLE: PINTAR-session-${self:provider.stage}
+      CLASS_TABLE: PINTAR-class-${self:provider.stage}
       USER_TABLE: PINTAR-user-${self:provider.stage}
       CREATED_AT_INDEX: CreatedAtIndex
       USER_IMAGES_S3_BUCKET: pintar-user-${self:provider.stage}
-      SESSION_IMAGES_S3_BUCKET: pintar-session-${self:provider.stage}
+      CLASS_IMAGES_S3_BUCKET: pintar-class-${self:provider.stage}
       SIGNED_URL_EXPIRATION: 300
       
 
