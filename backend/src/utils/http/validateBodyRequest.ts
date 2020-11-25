@@ -1,15 +1,15 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { validateObj } from "../validateObj";
 
-export function validateBodyRequest<T>(
+export async function validateBodyRequest<T>(
   event: APIGatewayProxyEvent,
   classFunction: { new (): T }
 ) {
   const body: T =
     typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
-  const isValidated = validateObj<T>(body, classFunction);
-  if (isValidated) return false;
+  const isValidated = await validateObj<T>(body, classFunction);
+  if (isValidated === true) return false;
 
   return {
     statusCode: 400,
