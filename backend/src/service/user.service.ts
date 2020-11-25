@@ -1,16 +1,13 @@
 import "source-map-support/register";
 
 import { Logger } from "winston";
-import { User } from "../models/user.model";
-import { CreateUserReq } from "../requests/user/createUser.request";
-import {
-  UpdateProfileReq,
-  UpdateUserTypeReq,
-} from "../requests/user/updateProfileRequest";
+import { User, UserType } from "../models/user.model";
 import { v4 as uuidv4 } from "uuid";
 import { UserRepository } from "../repository/user.repository";
-import { loggerRunP } from "../utils/loggerRun";
-//
+import { loggerRunP, NothingP } from "../utils/loggerRun";
+import { CreateUserDTO } from "../lambda/http/users/DTO/createUserDTO";
+import { UpdateUserDTO } from "../lambda/http/users/DTO/updateProfileDTO";
+
 // const bucketName = process.env.TODO_IMAGES_S3_BUCKET;
 
 export class UserService {
@@ -28,64 +25,81 @@ export class UserService {
   }
 
   /**
-   * This function will be triggered by auth0 hook, post-registration
    */
   static async create(
     userId: string,
-    userAuth0: CreateUserReq,
+    userDTO: CreateUserDTO,
     logger: Logger
   ): Promise<User> {
     // parse request body
 
     const newUser: User = {
       userId: userId,
-      emailMain: userAuth0.email,
-      username: userAuth0.username,
-      Session: new Set(),
-      age: 0,
-      name: "",
-      school: "",
-      address: "",
-      emailMainVerified: userAuth0.emailVerified,
+      emailMain: userDTO.emailMain,
+      username: userDTO.username,
+      emailMainVerified: userDTO.emailMainVerified,
       emailSecondary: [],
-      phoneNumber: userAuth0.phoneNumber,
-      phoneNumberVerified: userAuth0.phoneNumberVerified,
-      photo: "",
-      isClosed: false,
+      phoneNumber: userDTO.phoneNumber,
+      phoneNumberVerified: userDTO.phoneNumberVerified,
+      paymentId: "",
       isDeleted: false,
-      payment: null,
-      sessionHistory: {},
       type: 1000,
       updatedAt: Date.now(),
       createdAt: Date.now(),
     };
 
-    return loggerRunP(newUser, logger)
+    const paymentId = "P-" + new uuidv4();
+    newUser.paymentId = paymentId;
+
+    const id = new uuidv4();
+    if (userDTO.type === UserType.STUDENT) {
+      newUser.studentDetailId = id;
+    } else if (userDTO.type === UserType.TUTOR) {
+      newUser.tutorDetailId = id;
+    }
+
+    // think of conccurent execution with Promise.all
+    const isDone = loggerRunP(newUser, logger)
       .map(async () => {
         logger.info(`Creating user with params ${newUser}`);
         const items = await UserRepository.create(newUser);
         return items;
       })
+      // .map(async () => {
+      //   logger.info(`Creating student or tutor table with params ${newUser}`);
+      //   if (userDTO.type === UserType.STUDENT) {
+      //     await StudentRepository.create(userId, id);
+      //   } else if (userDTO.type === UserType.TUTOR) {
+      //     await TutorRepository.create(userId, id);
+      //   }
+      // })
+      // .map(async () => {
+      //   logger.info(`Creating payment table with params ${newUser}`);
+      //   await PaymentRepository.create(userId, paymentId);
+      // })
       .flat();
+
+    return (await isDone) instanceof NothingP ? null : newUser;
   }
 
   static async updateProfile(
     userId: string,
-    userReq: UpdateProfileReq,
+    userReq: UpdateUserDTO,
     logger: Logger
   ): Promise<User> {
-    const updateUser: UpdateProfileReq = userReq;
-
-    logger.info(`Updating user ${userId} with params ${updateUser}`);
-    return await UserRepository.updateProfile(userId, updateUser);
+    logger.info(`Updating user ${userId} with params ${userReq}`);
+    return await UserRepository.updateProfile(userId, userReq);
   }
 
   static async updateUserType(
     userId: string,
-    updateUserTypeReq: UpdateUserTypeReq,
+    userType: UserType,
     logger: Logger
   ): Promise<boolean> {
-    const updateUser: UpdateUserTypeReq = updateUserTypeReq;
+    const updateUser = {
+      userType,
+      updatedAt: Date.now(),
+    };
 
     logger.info(
       `Updating user type with params userId: ${userId}, type: ${updateUser}`

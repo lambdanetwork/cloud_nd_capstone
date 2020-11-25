@@ -1,8 +1,4 @@
 import { User } from "../models/user.model";
-import {
-  UpdateProfileReq,
-  UpdateUserTypeReq,
-} from "../requests/user/updateProfileRequest";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import * as AWS from "aws-sdk";
 import * as AWSXRay from "aws-xray-sdk";
@@ -15,9 +11,7 @@ const TableName = process.env.USER_TABLE;
 export class UserRepository {
   static async updateUserType(
     userId: string,
-    updateUser: UpdateUserTypeReq & {
-      updatedAt?: number;
-    }
+    updateUser: any
   ): Promise<boolean> {
     updateUser.updatedAt = Date.now();
 
@@ -34,12 +28,7 @@ export class UserRepository {
     await ddbDocumentClient.update(params).promise();
     return true;
   }
-  static async updateProfile(
-    userId: string,
-    updateUser: UpdateProfileReq & {
-      updatedAt?: number;
-    }
-  ): Promise<User> {
+  static async updateProfile(userId: string, updateUser: any): Promise<User> {
     updateUser.updatedAt = Date.now();
 
     const params: DocumentClient.UpdateItemInput = {
@@ -70,14 +59,9 @@ export class UserRepository {
   }
 
   static async create(newUser: User): Promise<User> {
-    delete newUser.Session;
     delete newUser.emailSecondary;
-    delete newUser.sessionHistory;
-    delete newUser.payment;
-    delete newUser.school;
-    delete newUser.address;
+    delete newUser.paymentId;
     delete newUser.photo;
-    // delete above keys, because it might be empty
 
     const params = {
       TableName,
