@@ -1,0 +1,41 @@
+import "source-map-support/register";
+
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyHandler,
+  APIGatewayProxyResult,
+} from "aws-lambda";
+import * as AWS from "aws-sdk";
+import { createLogger } from "../../../utils/logger";
+import { getUserId } from "../../utils";
+import { uuidv4 as v4 } from "uuid";
+
+AWS.config.update({ region: "ap-southeast-1" });
+const logger = createLogger("create user ");
+
+/**
+ * To be called by auth0
+ */
+export const handler: APIGatewayProxyHandler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
+  try {
+    const userId = getUserId(event);
+    const sessionId = v4();
+    const sessionBody =
+      typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+    sessionBody.sessionId = sessionId;
+
+    const user = await SessionService.create(userId, sessionBody, logger);
+    return {
+      statusCode: 200,
+      body: JSON.stringify(user),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+    };
+  } catch (err) {
+    logger.error(`fail to create item`, err);
+  }
+};
