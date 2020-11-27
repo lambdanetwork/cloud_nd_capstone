@@ -1,8 +1,8 @@
 export enum UserType {
-  ADMIN = 9000,
-  STUDENT = 1000,
-  PARENT = 1010,
-  TUTOR = 1020,
+  ADMIN = "9000",
+  STUDENT = "1000",
+  PARENT = "1010",
+  TUTOR = "1020",
 }
 
 export class User {
@@ -20,7 +20,7 @@ export class User {
 
   studentDetailId?: string;
   tutorDetailId?: string;
-  type: UserType;
+  userType: UserType;
 
   photo?: string;
   paymentId: string; //paymentID

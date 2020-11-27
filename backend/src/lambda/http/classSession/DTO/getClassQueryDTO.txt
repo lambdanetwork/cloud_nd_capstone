@@ -1,0 +1,15 @@
+import { IsNotEmpty, IsOptional } from "class-validator";
+
+export class getClassQueryDTO {
+  // from auth0
+  @IsNotEmpty()
+  @IsOptional()
+  studentId: string = "";
+
+  @IsNotEmpty()
+  @IsOptional()
+  tutorId: string = "";
+
+  page: number;
+  item: number;
+}

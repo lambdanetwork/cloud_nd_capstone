@@ -7,12 +7,13 @@ import {
 } from "aws-lambda";
 import { createLogger } from "../../../utils/logger";
 import { getUserId } from "../../utils";
-import { ClassSessionService } from "../../../service/session.service";
+import { ClassSessionService } from "../../../service/class.service";
 import { CloseClassDTO } from "./DTO/closeClassDTO";
 import { validateBodyRequest } from "../../../utils/http/validateBodyRequest";
 import { CompleteClassDTO } from "./DTO/CompleteClassDto";
 
 const loggerClose = createLogger("close class-session");
+const loggerComplete = createLogger("close complete-session");
 
 /**
  * Close can be done by tutor or student
@@ -69,7 +70,7 @@ export const complete: APIGatewayProxyHandler = async (
     const result = await ClassSessionService.complete(
       userId,
       classSessionBody,
-      loggerClose
+      loggerComplete
     );
 
     return {
@@ -81,6 +82,6 @@ export const complete: APIGatewayProxyHandler = async (
       },
     };
   } catch (err) {
-    loggerClose.error(err);
+    loggerComplete.error(err);
   }
 };

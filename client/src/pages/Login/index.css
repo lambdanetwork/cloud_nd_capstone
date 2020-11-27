@@ -1,0 +1,14 @@
+.login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  max-width: 1200px;
+  height: 100vh;
+}
+
+.login .login-container {
+  color: var(--ion-color-primary);
+  flex-direction: column;
+  width: 75%;
+}

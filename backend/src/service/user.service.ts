@@ -11,6 +11,16 @@ import { UpdateUserDTO } from "../lambda/http/users/DTO/updateProfileDTO";
 // const bucketName = process.env.TODO_IMAGES_S3_BUCKET;
 
 export class UserService {
+  static async getTutors(logger: Logger) {
+    return loggerRunP(null, logger)
+      .map(async () => {
+        logger.info(`get tutors with query`);
+        const items = await UserRepository.getTutors();
+        return items;
+      })
+      .flat();
+  }
+
   static async getUserById(userId: string, logger: Logger): Promise<User> {
     // logger.info(`get item with userId ${userId}`);
     // const items = await UserRepository.getUserById(userId);
@@ -36,14 +46,14 @@ export class UserService {
     const newUser: User = {
       userId: userId,
       emailMain: userDTO.emailMain,
+      emailMainVerified: false,
       username: userDTO.username,
-      emailMainVerified: userDTO.emailMainVerified,
       emailSecondary: [],
       phoneNumber: userDTO.phoneNumber,
-      phoneNumberVerified: userDTO.phoneNumberVerified,
+      phoneNumberVerified: false,
       paymentId: "",
       isDeleted: false,
-      type: 1000,
+      userType: userDTO.type,
       updatedAt: Date.now(),
       createdAt: Date.now(),
     };
@@ -117,17 +127,15 @@ export class UserService {
   }
 
   static async generateUploadPhotoUrl(userId: string, logger: Logger) {
-    const imageId = uuidv4();
-
     // const photoUrl: string =
     //   "https://" + bucketName + ".s3.amazonaws.com/" + imageId;
 
     return loggerRunP(userId, logger)
       .map(async (userId) => {
         logger.info(
-          `trying to get upload url userID: ${userId}, imageId: ${imageId}`
+          `trying to get upload url userID: ${userId}, imageId: ${userId}`
         );
-        return await UserRepository.getUploadPhotoUrl(imageId);
+        return await UserRepository.getUploadPhotoUrl(userId);
       })
       .flat();
   }

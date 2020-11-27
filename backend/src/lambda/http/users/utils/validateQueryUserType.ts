@@ -4,7 +4,7 @@ export function validateQueryUserType(event: {
   queryStringParameters: { [key: string]: any };
 }) {
   const type = event.queryStringParameters
-    ? Number(event.queryStringParameters.user_type)
+    ? String(event.queryStringParameters.user_type)
     : null;
   const isValidType =
     type &&

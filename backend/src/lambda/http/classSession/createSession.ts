@@ -11,14 +11,12 @@ import { getUserId } from "../../utils";
 import { CreateClassSessionDTO } from "./DTO/createClassDTO";
 import { validateBodyRequest } from "../../../utils/http/validateBodyRequest";
 import { sanitizeResponseBody } from "../../../utils/http/sanitizeResponse";
-import { ClassSessionService } from "../../../service/session.service";
+import { ClassSessionService } from "../../../service/class.service";
 
 AWS.config.update({ region: "ap-southeast-1" });
-const logger = createLogger("create user ");
+const logger = createLogger("create class ");
 
-/**
- * To be called by auth0
- */
+/**  */
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -35,7 +33,6 @@ export const handler: APIGatewayProxyHandler = async (
     if (!!errorValidateBody) return errorValidateBody;
 
     // if no error
-
     const result = await ClassSessionService.create(
       userId,
       classSessionBody,

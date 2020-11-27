@@ -17,7 +17,7 @@ export const handler: APIGatewayProxyHandler = async (
   try {
     const userId = getUserId(event);
 
-    const url = UserService.generateUploadPhotoUrl(userId, logger);
+    const url = await UserService.generateUploadPhotoUrl(userId, logger);
     return {
       statusCode: 200,
       body: JSON.stringify({

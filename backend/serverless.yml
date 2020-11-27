@@ -21,8 +21,8 @@ provider:
 
     environment:
       REGION: ${opt:region, 'ap-southeast-1'}
-      CLASS_TABLE: PINTAR-class-${self:provider.stage}
-      USER_TABLE: PINTAR-user-${self:provider.stage}
+      CLASS_TABLE: PINTAR-class-${self:provider.stage}-v3
+      USER_TABLE: PINTAR-user-${self:provider.stage}-v3
       CREATED_AT_INDEX: CreatedAtIndex
       USER_IMAGES_S3_BUCKET: pintar-user-${self:provider.stage}
       CLASS_IMAGES_S3_BUCKET: pintar-class-${self:provider.stage}
@@ -45,9 +45,103 @@ functions:
 
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
+
+  CreateClass:
+    handler: src/lambda/http/classSession/createSession.handler
+    events:
+      - http:
+          method: post
+          path: classes
+          cors: true
+          authorizer: Auth
+          documentation:
+            summary: Create a new class
+            description: Create a new class
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CLASS_TABLE}
   
-  GetUsers: ${file(src/lambda/http/users/config/getUser.config.yml)}
-   
+  CloseClass:
+    handler: src/lambda/http/classSession/closeOrCompleteSession.close
+    events:
+      - http:
+          method: post
+          path: classes/close
+          cors: true
+          authorizer: Auth
+          documentation:
+            summary: close a class
+            description: close a class
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CLASS_TABLE}
+
+  CompleteClass:
+    handler: src/lambda/http/classSession/closeOrCompleteSession.complete
+    events:
+      - http:
+          method: post
+          path: classes/complete
+          cors: true
+          authorizer: Auth
+          documentation:
+            summary: complete a class
+            description: complete a class
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CLASS_TABLE}
+
+  ClassGenerateUploadUrl:
+    handler: src/lambda/http/classSession/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: classes/photoUrl
+          cors: true
+          authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.CLASS_IMAGES_S3_BUCKET}/*
+
+  GetUsers:
+    handler: src/lambda/http/users/getUser.handler
+    events:
+      - http:
+          method: get
+          path: users
+          cors: true
+          authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE}
+        
+  GetTutors:
+    handler: src/lambda/http/users/getTutors.handler
+    events:
+      - http:
+          method: get
+          path: tutors
+          cors: true
+          authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE}/index/userTypeIndex
+
+        
   CreateUser:
     handler: src/lambda/http/users/createUser.handler
     events:
@@ -145,8 +239,6 @@ resources:
         ValidateRequestBody: true
         ValidateRequestParameters: false
     
-        
-
     GatewayResponseDefault4XX:
       Type: AWS::ApiGateway::GatewayResponse
       Properties:
@@ -157,12 +249,60 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
-
+    # DynamoDB =================================================================================
+    ClassTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.CLASS_TABLE} 
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: classId
+            AttributeType: S
+          - AttributeName: studentId
+            AttributeType: S
+          - AttributeName: tutorId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: classId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: studentIdIndex
+            KeySchema:
+              - AttributeName: studentId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL # What attributes will be copied to an index
+          - IndexName: tutorIdIndex
+            KeySchema:
+              - AttributeName: tutorId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL # What attributes will be copied to an index
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USER_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: userType
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userTypeIndex
+            KeySchema:
+              - AttributeName: userType
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL # What attributes will be copied to an index
     # S3 =================================================================================
     SessionBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.environment.SESSION_IMAGES_S3_BUCKET}
+        BucketName: ${self:provider.environment.CLASS_IMAGES_S3_BUCKET}
         CorsConfiguration:
           CorsRules:
             - AllowedOrigins:
@@ -216,54 +356,7 @@ resources:
               Effect: Allow
               Principal: '*'
               Action: 's3:GetObject'
-              Resource: 'arn:aws:s3:::pintar-session-${self:provider.stage}/*'
+              Resource: 'arn:aws:s3:::pintar-class-${self:provider.stage}/*'
         Bucket: !Ref SessionBucket
     
-    # DynamoDB =================================================================================
-    SessionTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.SESSION_TABLE} 
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: sessionId
-            AttributeType: S
-          # - AttributeName: studentId
-          #   AttributeType: S
-          # - AttributeName: tutorId
-          #   AttributeType: S
-        KeySchema:
-          - AttributeName: sessionId
-            KeyType: HASH
-        # LocalSecondaryIndexes:
-        #   - IndexName: ${self:provider.environment.CREATED_AT_INDEX}
-        #     KeySchema:
-        #       - AttributeName: tutorId
-        #         KeyType: HASH
-        #     Projection:
-        #       ProjectionType: ALL # What attributes will be copied to an index
-
-    UserTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.USER_TABLE}
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
-          # - AttributeName: emailMain
-          #   AttributeType: S
-        KeySchema:
-          - AttributeName: userId
-            KeyType: HASH
-        # LocalSecondaryIndexes:
-        #   - IndexName: ${self:provider.environment.CREATED_AT_INDEX}
-        #     KeySchema:
-        #       - AttributeName: emailMain
-        #         KeyType: HASH
-        #       - AttributeName: emailMain
-        #         KeyType: HASH
-        #     Projection:
-        #       ProjectionType: ALL # What attributes will be copied to an index
-
-
+    

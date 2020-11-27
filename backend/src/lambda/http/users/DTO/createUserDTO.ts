@@ -8,7 +8,6 @@ export class CreateUserDTO {
   @IsEmail()
   @IsNotEmpty()
   emailMain: string;
-  emailMainVerified: boolean = false;
 
   @IsOptional()
   emailSecondary?: string[];
@@ -16,8 +15,6 @@ export class CreateUserDTO {
   // tenant: string;
   @IsOptional()
   phoneNumber?: string;
-  @IsOptional()
-  phoneNumberVerified?: boolean;
 
   studentDetailId?: string;
   tutorDetailId?: string;

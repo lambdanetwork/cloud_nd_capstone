@@ -2,49 +2,52 @@ import "source-map-support/register";
 
 import {
   APIGatewayProxyEvent,
-  APIGatewayProxyResult,
   APIGatewayProxyHandler,
+  APIGatewayProxyResult,
 } from "aws-lambda";
+import * as AWS from "aws-sdk";
 import { createLogger } from "../../../utils/logger";
 import { getUserId } from "../../utils";
-import { ClassSessionService } from "../../../service/class.service";
-import { GenerateUploadUrlDTO } from "./DTO/GenerateUploadUrlDTO";
+import { CreateClassSessionDTO } from "./DTO/createClassDTO";
 import { validateBodyRequest } from "../../../utils/http/validateBodyRequest";
+import { sanitizeResponseBody } from "../../../utils/http/sanitizeResponse";
+import { ClassSessionService } from "../../../service/class.service";
+AWS.config.update({ region: "ap-southeast-1" });
+const logger = createLogger("update class detail ");
 
-const logger = createLogger("generate user signed url ");
-
+/**  */
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
     const userId = getUserId(event);
-    const generateBody: GenerateUploadUrlDTO =
+    const classSessionBody: CreateClassSessionDTO =
       typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
     // validate request body, if error return
     const errorValidateBody = await validateBodyRequest(
       event,
-      GenerateUploadUrlDTO
+      CreateClassSessionDTO
     );
     if (!!errorValidateBody) return errorValidateBody;
 
-    const url = await ClassSessionService.generateUploadPhotoUrl(
+    // if no error
+    const result = await ClassSessionService.create(
       userId,
-      generateBody.classId,
+      classSessionBody,
       logger
     );
+    sanitizeResponseBody(result);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        uploadUrl: url,
-      }),
+      body: JSON.stringify(result),
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,
       },
     };
   } catch (err) {
-    logger.error("failed to get signed url", err);
+    logger.error(`fail to create item`, err);
   }
 };

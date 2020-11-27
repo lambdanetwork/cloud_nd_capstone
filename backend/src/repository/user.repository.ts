@@ -1,7 +1,8 @@
-import { User } from "../models/user.model";
+import { User, UserType } from "../models/user.model";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import * as AWS from "aws-sdk";
 import * as AWSXRay from "aws-xray-sdk";
+import { v4 as uuidv4 } from "uuid";
 
 AWS.config.update({ region: "ap-southeast-1" });
 
@@ -9,6 +10,19 @@ const ddbDocumentClient = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.USER_TABLE;
 
 export class UserRepository {
+  static async getTutors() {
+    const params = {
+      TableName,
+      IndexName: "userTypeIndex",
+      KeyConditionExpression: "userType = :userType",
+      ExpressionAttributeValues: {
+        ":userType": UserType.TUTOR,
+      },
+      ScanIndexForward: false,
+    };
+    const result = await ddbDocumentClient.query(params).promise();
+    return result.Items as User[];
+  }
   static async updateUserType(
     userId: string,
     updateUser: any
@@ -99,8 +113,9 @@ export class UserRepository {
       return false;
     }
   }
-  static async getUploadPhotoUrl(imageId: string): Promise<string> {
+  static async getUploadPhotoUrl(userId: string): Promise<string> {
     const XAWS = AWSXRay.captureAWS(AWS);
+    const imageId = userId + uuidv4().slice(0, 5);
 
     const s3 = new XAWS.S3({
       signatureVersion: "v4",
@@ -117,6 +132,22 @@ export class UserRepository {
         Expires: urlExpiration,
       });
     }
+
+    // update user table with new image address to avoid browser-cache
+    const photoUrl: string =
+      "https://" + bucketName + ".s3.amazonaws.com/" + imageId;
+    const options = {
+      TableName,
+      Key: {
+        userId: userId,
+      },
+      UpdateExpression: "set photo = :r",
+      ExpressionAttributeValues: {
+        ":r": photoUrl,
+      },
+      ReturnValues: "UPDATED_NEW",
+    };
+    await ddbDocumentClient.update(options).promise();
 
     const url = getUploadUrl(imageId);
     return url;
