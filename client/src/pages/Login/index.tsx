@@ -18,7 +18,7 @@ export const Login: React.FC = () => {
     >
       <div className="login">
         <div className="login-container">
-          <h1>Join Sensei Today</h1>
+          <h1>Join Pintar Today</h1>
 
           <IonButton expand="block">Create Account</IonButton>
           <IonButton expand="block" color="dark">
