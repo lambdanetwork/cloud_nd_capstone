@@ -1,10 +1,10 @@
 import React from "react";
-import { Route } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { IonApp, IonLoading } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 
-import { Main } from "./pages/Main";
+import { TabRoute } from "./pages/TabRoute";
 import { Login } from "./pages/Login";
 
 /* Core CSS required for Ionic components to work properly */
@@ -25,12 +25,14 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+
 import AuthService from "./auth/AuthService";
 
 const history = createBrowserHistory();
 AuthService.init(history);
+
 const App: React.FC = () => {
-  const userJWT = localStorage.getItem("isLoggedIn");
+  const userJWT = localStorage.getItem("idToken");
   if (
     !userJWT &&
     window.location.pathname !== "/login" &&
@@ -41,25 +43,26 @@ const App: React.FC = () => {
   }
   return (
     <IonApp>
-      <IonReactRouter history={history}>
-        <Route
-          path="/callback"
-          render={(props) => {
-            alert("here");
-            AuthService.handleAuthentication(props);
+      <IonReactRouter>
+        <Switch>
+          <Route
+            path="/callback"
+            render={(props) => {
+              AuthService.handleAuthentication();
 
-            return (
-              <IonLoading
-                cssClass="my-custom-class"
-                isOpen={true}
-                message={"Please wait..."}
-                duration={5000}
-              />
-            );
-          }}
-        />
-        <Route path="/login" component={Login} exact={true} />
-        <Route path="/" component={Main} exact={true} />
+              return (
+                <IonLoading
+                  cssClass="my-custom-class"
+                  isOpen={true}
+                  message={"Please wait..."}
+                  duration={5000}
+                />
+              );
+            }}
+          />
+          <Route path="/login" component={Login} exact={true} />
+          <Route path="/" component={TabRoute} />
+        </Switch>
       </IonReactRouter>
     </IonApp>
   );
