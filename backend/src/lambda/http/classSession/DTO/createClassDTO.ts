@@ -19,6 +19,8 @@ export class CreateClassSessionDTO {
   tutorId: string;
 
   @IsNotEmpty()
-  @IsOptional()
   imageQuestion: string;
+
+  @IsNotEmpty()
+  classId: string;
 }
