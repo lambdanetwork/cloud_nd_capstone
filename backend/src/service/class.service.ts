@@ -67,4 +67,15 @@ export class ClassSessionService {
       })
       .flat();
   }
+
+  static async get(userId, logger){
+    return loggerRunP(userId, logger)
+      .map(async (userId) => {
+        logger.info(
+          `trying to get classes userID: ${userId}`
+        );
+        return await ClassRepository.getClasses();
+      })
+      .flat();
+  }
 }

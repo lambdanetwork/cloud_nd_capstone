@@ -2,7 +2,7 @@ import { ClassSession } from "../models/class.model";
 import * as AWS from "aws-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import * as AWSXRay from "aws-xray-sdk";
-const XAWS = AWSXRay.captureAWS(AWS);
+
 const TABLE_NAME = process.env.CLASS_TABLE;
 AWS.config.update({ region: "ap-southeast-1" });
 const ddbDocumentClient = new DocumentClient();
@@ -15,11 +15,29 @@ export class ClassRepository {
   static async getByClassId(classId): Promise<ClassSession[]> {
     const params = {
       TableName: TABLE_NAME,
+      ScanIndexForward: false,
       KeyConditionExpression: "classId = :classId",
       ExpressionAttributeValues: {
         ":classId": classId,
       },
     };
+    const result = await ddbDocumentClient.query(params).promise();
+    return result.Items as ClassSession[];
+  }
+
+  static async getClasses(){
+    // status, 0:OPEN, 1:COMPLETE, 2:CLOSE
+    const params = {
+      TableName: TABLE_NAME,
+      IndexName: "statusIndex",
+      KeyConditionExpression: "#status = :status",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: {
+        ":status": "0",
+      },
+      ScanIndexForward: false,
+    };
+    console.log(TABLE_NAME)
     const result = await ddbDocumentClient.query(params).promise();
     return result.Items as ClassSession[];
   }
@@ -78,6 +96,7 @@ export class ClassRepository {
   }
 
   static async generateUploadUrl(classId: string): Promise<string> {
+    const XAWS = AWSXRay.captureAWS(AWS);
     const s3 = new XAWS.S3({
       signatureVersion: "v4",
       region: process.env.REGION,

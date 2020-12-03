@@ -8,8 +8,6 @@ import {
 import * as AWS from "aws-sdk";
 import { createLogger } from "../../../utils/logger";
 import { getUserId } from "../../utils";
-import { CreateClassSessionDTO } from "./DTO/createClassDTO";
-import { validateBodyRequest } from "../../../utils/http/validateBodyRequest";
 import { sanitizeResponseBody } from "../../../utils/http/sanitizeResponse";
 import { ClassSessionService } from "../../../service/class.service";
 
@@ -22,20 +20,19 @@ export const handler: APIGatewayProxyHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const userId = getUserId(event);
-    const classSessionBody: CreateClassSessionDTO =
-      typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+    // const classSessionBody: CreateClassSessionDTO =
+      // typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
-    // validate request body, if error return
-    const errorValidateBody = await validateBodyRequest(
-      event,
-      CreateClassSessionDTO
-    );
-    if (!!errorValidateBody) return errorValidateBody;
+    // // validate request body, if error return
+    // const errorValidateBody = await validateBodyRequest(
+    //   event,
+    //   CreateClassSessionDTO
+    // );
+    // if (!!errorValidateBody) return errorValidateBody;
 
     // if no error
-    const result = await ClassSessionService.create(
+    const result = await ClassSessionService.get(
       userId,
-      classSessionBody,
       logger
     );
     sanitizeResponseBody(result);
