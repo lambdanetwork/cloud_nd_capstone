@@ -47,7 +47,7 @@ export class ClassSessionService {
     return true;
   }
 
-  static async generateUploadPhotoUrl(userId, classId, logger) {
+  static async generateUploadPhotoUrl(userId, logger) {
     const imageId = uuidv4();
 
     // const photoUrl: string =

@@ -71,7 +71,7 @@ export class UserService {
     // think of conccurent execution with Promise.all
     const isDone = loggerRunP(newUser, logger)
       .map(async () => {
-        logger.info(`Creating user with params ${newUser}`);
+        logger.info(`Creating user with params ${JSON.stringify(newUser)}`);
         const items = await UserRepository.create(newUser);
         return items;
       })
