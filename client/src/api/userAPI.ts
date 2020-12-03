@@ -18,14 +18,13 @@ export default {
     }
   },
 
-  async createUser(body: string) {
+  async createUser(body: any) {
     try {
       const idToken = await localStorage.getItem("idToken");
-      const response = await Axios.post(`${apiEndpoint}/users`, {
+      const response = await Axios.post(`${apiEndpoint}/users`, body, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
-          body,
         },
       });
       return response.data;
