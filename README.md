@@ -2,63 +2,64 @@
 
 ## Pintar App
 
-### is an backend of imaginary education company.
+* is an backend of imaginary education company.
+* user could capture a question an open a session with tutor.
+* Session will be similar to udacity Mentor help session.
 
-### user could capture a question an open a session with tutor.
 
-### Session will be similar to udacity Mentor help session.
+### How to run:
+```
+1. cd client
+2. npm install && ionic serve
+```
 
-# Tables - auth0
+### Functionality:
+1. when user signup, it will set to student account
+2. user can create class 
+    * to create Class:
+        * user has to upload image
+        * set starttime
+        * set endtime
 
-## User
+3. user can update profile: 
+    * change avatar
+    * change username
+    * change phonenumber
 
-userId
-username
-email
-password
-tenant
-emailVerified
-"phoneNumber": "1-000-000-0000",
-"phoneNumberVerified": true,
+4. user can get list of tutor
 
-# Tables DynamoDB
+## Tables DynamoDB
 
-## User Table
+### User Table
 
-name
-age
-school
-photo
-type: 900 | 100 | 200
-createdAt
-has-many session
+* name: string
+* age
+* school
+* photo
+* type: 1000 (student) | 1020 (tutor)
+* createdAt
+* has-many session
 
-## Tutor Table
+### Tutor Table
 
 similar to User Table (with more information)
-has-many session
-has-many session-history
+* has-many session
+* has-many session-history
 
-session-involved: MAP
+### Session Table
 
-- sessionId:
-- student:
-- ratingFromStudent:
+- has-1 image.
+- studentID:
+- tutorID:
+- status: "0"(open) | "1"(Complete) | "2"(CLOSE)
 - createdAt:
-- completedAt:
-
-## Session Table
-
-has-1 image.
-studentID:
-tutorID:
-status: open | end
-createdAt:
-chat-history:
-List?<Chat>:
-{ chatId:
-replyToID:
-author:
-content:
-createdAt:
-}
+- chat-history: Chat[]
+```
+    Chat { 
+        chatId:
+        replyToID:
+        author:
+        content:
+        createdAt:
+    }
+```

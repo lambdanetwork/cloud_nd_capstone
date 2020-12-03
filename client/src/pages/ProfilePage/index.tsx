@@ -4,12 +4,9 @@ import {
   IonPage,
   IonToolbar,
   IonTitle,
-  IonList,
   IonItem,
   IonInput,
   IonLabel,
-  IonFab,
-  IonFabButton,
   IonIcon,
   IonButton,
   IonAvatar,
@@ -19,11 +16,7 @@ import tutorAPI from "../../api/tutorAPI";
 import { Tutor } from "../../types/tutor";
 import "./index.css";
 import {
-  Plugins,
   CameraResultType,
-  Capacitor,
-  FilesystemDirectory,
-  CameraPhoto,
   CameraSource,
   Camera,
 } from "@capacitor/core";
@@ -92,7 +85,7 @@ export const ProfilePage: React.FC = () => {
       <IonContent>
         <div className="profile-avatar">
           <IonAvatar>
-            <img src={detail.photo || defaultAvatar} />
+            <img src={detail.photo || defaultAvatar} alt="avatar"/>
           </IonAvatar>
         </div>
         <IonItem>

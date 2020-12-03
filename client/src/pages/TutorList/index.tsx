@@ -12,6 +12,7 @@ import {
 } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import tutorAPI from "../../api/tutorAPI";
+import { Spinner } from "../../components/Spinner";
 import type { Tutor } from "../../types/tutor";
 
 import "./index.css";
@@ -44,6 +45,7 @@ export const TutorPage: React.FC = () => {
       >
         <IonList>
           <IonListHeader>Tutor List</IonListHeader>
+          {tutors.length <= 0 && <Spinner />}
           {tutors.map((tutor) => {
             return (
               <IonItem key={tutor.userId}>

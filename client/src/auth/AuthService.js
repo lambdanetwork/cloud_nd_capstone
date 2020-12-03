@@ -1,7 +1,7 @@
 import auth0 from "auth0-js";
 import userAPI from "../api/userAPI";
 import { authConfig } from "../config/authConfig";
-
+import { decode } from 'jsonwebtoken'
 export default class AuthService {
   static accessToken;
   static idToken;
@@ -42,7 +42,7 @@ export default class AuthService {
           console.error(err)
         }
 
-        this.history.replace("/");
+        window.location.reload();
         
       } else if (err) {
         this.history.replace("/");
@@ -63,7 +63,9 @@ export default class AuthService {
   static setSession = (authResult) => {
     // Set isLoggedIn flag in localStorage
     localStorage.setItem("idToken", authResult.idToken);
-
+    const userId= parseUserId(authResult.idToken);
+    console.log(userId)
+    localStorage.setItem("userId", userId)
     // Set the time that the access token will expire at
     let expiresAt = authResult.expiresIn * 1000 + new Date().getTime();
     this.accessToken = authResult.accessToken;
@@ -111,4 +113,16 @@ export default class AuthService {
     let expiresAt = this.expiresAt;
     return new Date().getTime() < expiresAt;
   };
+}
+
+
+
+/**
+ * Parse a JWT token and return a user id
+ * @param jwtToken JWT token to parse
+ * @returns a user id from the JWT token
+ */
+export function parseUserId(jwtToken) {
+  const decodedJwt = decode(jwtToken) 
+  return decodedJwt.sub
 }
