@@ -149,7 +149,7 @@ functions:
           method: post
           path: users
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
           documentation:
             summary: Create a new user
             description: Create a new user
