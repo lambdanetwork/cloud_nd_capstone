@@ -20,14 +20,11 @@ export const Login: React.FC = () => {
         <div className="login-container">
           <h1>Join Pintar Today</h1>
 
-          <IonButton expand="block">Create Account</IonButton>
+          <IonButton onClick={signin} expand="block">Login/Signup</IonButton>
           <IonButton expand="block" color="dark">
             Apply to be tutor
           </IonButton>
-          <IonText color="dark">
-            Already a member,{" "}
-            <IonRouterLink onClick={signin}>sign in</IonRouterLink>{" "}
-          </IonText>
+          
         </div>
       </div>
     </IonContent>

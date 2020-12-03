@@ -1,4 +1,5 @@
 import auth0 from "auth0-js";
+import userAPI from "../api/userAPI";
 import { authConfig } from "../config/authConfig";
 
 export default class AuthService {
@@ -23,11 +24,26 @@ export default class AuthService {
   };
 
   static handleAuthentication = (props) => {
-    this.auth0.parseHash((err, authResult) => {
+    this.auth0.parseHash(async (err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         console.log("Access token: ", authResult.accessToken);
         console.log("id token: ", authResult.idToken);
         this.setSession(authResult);
+
+        // get user from db, if user does not exists, try to create
+        try {
+          const user = await userAPI.getUserByJWT();
+          if(!user) {
+            await userAPI.createUser({
+              type: "1000"
+            });
+          }
+        } catch(err){ 
+          console.error(err)
+        }
+
+        this.history.replace("/");
+        
       } else if (err) {
         this.history.replace("/");
         console.log(err);
@@ -46,7 +62,7 @@ export default class AuthService {
 
   static setSession = (authResult) => {
     // Set isLoggedIn flag in localStorage
-    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("idToken", authResult.idToken);
 
     // Set the time that the access token will expire at
     let expiresAt = authResult.expiresIn * 1000 + new Date().getTime();
@@ -79,7 +95,7 @@ export default class AuthService {
     this.expiresAt = 0;
 
     // Remove isLoggedIn flag from localStorage
-    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("idToken");
 
     this.auth0.logout({
       return_to: window.location.origin,
